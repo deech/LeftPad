@@ -1,0 +1,13 @@
+* Left Pad In ATS
+This repo contains a literate implementation of [[https://www.npmjs.com/package/left-pad][infamous left-pad NPM module]]
+to show off a few of the features of the wonderful [[http://ats-lang.org][ATS programming language.]]
+
+~left-pad.org~ contains the full literate source and documentation. Github does
+a decent job of rendering ~org~ files so you can totally read it here but for
+the best results I recommend either cloning this repo and viewing
+~left-pad.html~ locally or the [[https://rawgit.com/deech/LeftPad/master/left-pad.html][Rawgit link]].
+
+While this isn't a blog post if you would like to start a discussion or just
+leave a comment please open an issue.
+
+Hope you enjoy it and I look forward to your feedback!

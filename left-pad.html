@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ATS Left Pad</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Aditya Siram" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2017 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">ATS Left Pad</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org48c842e">1. Overview</a></li>
+<li><a href="#org3d34791">2. Installation</a></li>
+<li><a href="#org0d5e49a">3. Imports</a></li>
+<li><a href="#org3e7a064">4. The Type Of Left Pad</a></li>
+<li><a href="#org3380358">5. Generating The Pad</a>
+<ul>
+<li><a href="#orgbc17344">5.1. Type</a></li>
+<li><a href="#orgbc83535">5.2. Implementation</a></li>
+</ul>
+</li>
+<li><a href="#org582d52e">6. The Implementation Of Left Pad</a></li>
+<li><a href="#org8ee306f">7. Main</a></li>
+<li><a href="#org73f0be0">8. References</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org48c842e" class="outline-2">
+<h2 id="org48c842e"><span class="section-number-2">1</span> Overview</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The implementation of <code>left-pad</code> below is an exercise in wilfully
+complicating a small problem to demonstrate some of the unique features of
+the <a href="http://ats-lang.org">ATS programming language</a> for verified systems programming including
+refinement types, linear logic and embedded proofs.
+</p>
+
+<p>
+<code>left-pad</code> is a small command-line program that takes a string and length and
+fills out the string to that length with '0's. If the string is longer than the
+given length it isn't changed. For example:
+</p>
+<pre class="example">
+&gt; ./left-pad xxx 5
+padding: 00xxx
+&gt; ./left-pad xxx 2
+padding: xxx
+</pre>
+
+<p>
+Since ATS is for systems programming and I have to show that <code>left-pad</code> is memory clean:
+</p>
+<pre class="example">
+&gt; valgrind ./left-pad xxxxx 20
+==19303== Memcheck, a memory error detector
+==19303== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==19303== Using Valgrind-3.12.0.SVN and LibVEX; rerun with -h for copyright info
+==19303== Command: ./left-pad xxxxx 20
+==19303==
+padding: 000000000000000xxxxx
+==19303==
+==19303== HEAP SUMMARY:
+==19303==     in use at exit: 0 bytes in 0 blocks
+==19303==   total heap usage: 22 allocs, 22 frees, 1,355 bytes allocated
+==19303==
+==19303== All heap blocks were freed -- no leaks are possible
+==19303==
+==19303== For counts of detected and suppressed errors, rerun with: -v
+==19303== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+</pre>
+
+<p>
+You might be shocked that <code>left-pad</code> is allocating a kilobyte of heap memory
+for 20 characters. This is on purpose! The implementation below isn't about
+conserving memory but making a mess and leaning on the type system to make me
+clean it up.
+</p>
+
+<p>
+Also my <code>left-pad</code> is totally not Unicode safe.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3d34791" class="outline-2">
+<h2 id="org3d34791"><span class="section-number-2">2</span> Installation</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+To install ATS this install script <a href="https://github.com/ats-lang/ats-lang.github.io/blob/master/SCRIPT/C9-ATS2-install.sh">provided on Github</a>. Please inspect it first! To build <code>left-pad</code>, clone this repo and do:
+</p>
+<pre class="example">
+&gt; make
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org0d5e49a" class="outline-2">
+<h2 id="org0d5e49a"><span class="section-number-2">3</span> Imports</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-text">#include "share/atspre_staload.hats"
+staload UN = "prelude/SATS/unsafe.sats"
+</pre>
+</div>
+<p>
+Most ATS programs start with the <code>#include</code> line, it imports a number of useful
+modules from the ATS prelude.
+</p>
+
+<p>
+The second import is a module needed for unsafe coercions. They circumvent the
+type system and are needed in this case due to a bug ATS version 0.3.8. It has
+since been <a href="https://github.com/githwxi/ATS-Postiats/commit/015b41486ba0ad681cc2590c53e9a9ad2f2dc26e">fixed</a> but a new version has not been released as of this writing.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3e7a064" class="outline-2">
+<h2 id="org3e7a064"><span class="section-number-2">4</span> The Type Of Left Pad</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The essence of left pad can captured pretty comfortably into the ATS type system:
+</p>
+<div class="org-src-container">
+<pre class="src src-text" id="orgcfe82cd">dataprop PAD(int,int,int) =
+  | {p,l:nat} Yep(p,l,p-l)
+  | {p,l:nat} Nope(p,l,0)
+
+extern fun left_pad
+  {p,l:nat | p&gt;0 &amp;&amp; l&gt;0}
+  (
+    pad: ssize_t p,
+    c: charNZ,
+    s: strnptr l
+  ): [cushion:nat] (PAD(p,l,cushion) | strnptr (cushion+l))
+</pre>
+</div>
+<p>
+The first block represents a relationship between <i>sorts</i> of types. A sort in
+ATS is a type which indexes another type constraining it in some way. A
+<code>dataprop</code> encodes a relationship between sorts, in this case, deciding whether
+or not to pad the string at the sort level. This is confusing and I will return
+to this <code>dataprop</code> a couple of paragraphs down.
+</p>
+
+<p>
+The second block is the type signature of <code>left_pad</code>. In most programming languages
+function signatures have arguments and their types, in ATS we have to deal with
+sorts, refinements and proofs as well. I think ATS signatures are easiest to understand
+when each level is considered individually.
+</p>
+
+<p>
+At the value level it takes:
+</p>
+<ul class="org-ul">
+<li><code>pad</code>, the amount to which to pad the string,</li>
+<li><code>c</code>, the pad character</li>
+<li><code>s</code>, the string itself.</li>
+</ul>
+
+<p>
+At the type level we have:
+</p>
+<ul class="org-ul">
+<li><code>pad</code>, a <code>ssize_t</code> which is just like C's <code>size_t</code> but signed</li>
+<li><code>c</code>, a C char</li>
+<li><code>s</code>, a pointer to a null terminated C string.</li>
+</ul>
+
+<p>
+At the level of sorts and refinements:
+</p>
+<ul class="org-ul">
+<li><code>pad</code> is indexed by <code>p</code> which is constrained (in the line starting with
+<code>{p,l:nat ... }</code>) to be a natural number greater than 0. Practically this
+means that in order to call <code>left_pad</code>
+the type checker has to be satisfied that <code>pad</code> is 1 or more.</li>
+<li>with <code>c</code> it isn't apparent but <code>charNZ</code> which comes from the prelude is a C char refined so it cannot be null.</li>
+<li><code>s</code> is a C string guaranteed to be non-empty because it is length indexed with
+<code>l</code> refined a natural number that has to be non-zero.</li>
+</ul>
+
+<p>
+The return type following the <code>:</code> on the last line has 2 parts: the string
+being returned to the right of the <code>|</code>, and to the left a <i>proof</i> that the
+sorts introduced <code>p</code> and <code>l</code> and a new sort <code>cushion</code> are related to each
+other in one of the ways <code>Yep</code> or <code>Nope</code> described by the <code>dataprop</code> <code>PAD</code>. In
+case of <code>Yep</code> relates <code>p</code> and <code>l</code> to the <code>cushion</code> as <code>p-l</code>. Otherwise <code>Nope</code>
+relates them to to 0. Practically <code>cushion</code> is a sort level natural number
+attesting that the string gets padded by the difference of <code>pad</code> and the
+length of <code>s</code> or that <code>s</code> is untouched.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3380358" class="outline-2">
+<h2 id="org3380358"><span class="section-number-2">5</span> Generating The Pad</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orgbc17344" class="outline-3">
+<h3 id="orgbc17344"><span class="section-number-3">5.1</span> Type</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+The pad itself uses <code>fill_list</code> to build a linked list of the same character.
+</p>
+<div class="org-src-container">
+<pre class="src src-text">extern fun {t:t@ype} fill_list
+  {n:nat}
+  (
+    size:ssize_t n,
+    c: t
+  ): list_vt(t,n)
+</pre>
+</div>
+<p>
+<code>fill_list</code> is a function that creates a list of some generic type,
+<code>{t:t@ype}</code> by taking a <code>size</code> modified by a sort <code>n</code> which tracks the
+number of items to be filled, and the element <code>c</code> that will get replicated
+<code>size</code> times. It returns a <code>list_vt</code>, a list <i>viewtype</i>, meaning it can only
+ be used once, filled with <code>t</code>'s and also length indexed by <code>n</code>. This statically
+ guarantees that the return list will have <code>size</code> elements.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbc83535" class="outline-3">
+<h3 id="orgbc83535"><span class="section-number-3">5.2</span> Implementation</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+A recursive inner function <code>loop</code> is used to build up the list. Recursion is
+very encouraged, safe, efficient and well integrated into ATS. The <code>.&lt;i&gt;.</code> is a
+termination metric, a sort that must be shown to be decreasing on every
+recursive call which guarantees that recursion will terminate. If <code>pred size</code>
+was not there in the recursive call the loop would not typecheck.
+</p>
+<div class="org-src-container">
+<pre class="src src-text">implement {t}fill_list{n}(size,c) =
+  let
+    fun loop
+      {i:nat | i &lt;= n}
+      .&lt;i&gt;.
+      (
+        size : ssize_t i,
+        c: t,
+        res: list_vt(t, n-i)
+      ): list_vt(t,n) =
+      if (size = i2ssz(0))
+      then res
+      else loop(pred size, c, list_vt_cons(c,res))
+  in
+    loop(size,c,list_vt_nil())
+  end
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org582d52e" class="outline-2">
+<h2 id="org582d52e"><span class="section-number-2">6</span> The Implementation Of Left Pad</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+The code for <code>left_pad</code> itself is mostly what you might expect but with a couple of points
+of interest and a bit of nastiness.
+</p>
+<div class="org-src-container">
+<pre class="src src-text">implement left_pad{p,l}(pad,c,s) =
+  let
+    val size = strnptr_length(s)
+  in
+    if (pad &gt; size)
+    then
+      let
+        val padding = pad-size
+        val char_list = fill_list(padding,c)
+        val pad_string = string_make_list_vt(char_list)
+        val res = string1_append(
+                    $UN.strnptr2string(pad_string),
+                    $UN.strnptr2string(s)
+                  )
+      in
+        begin
+          strnptr_free(pad_string);
+          strnptr_free(s);
+          (Yep{p,l} | res)
+        end
+      end
+    else
+      (Nope{p,l} | s)
+  end
+</pre>
+</div>
+
+<p>
+One interesting bit are the lines starting with <code>(Yep{p,l} | ...)</code> and
+<code>(Nope{p,l} | ...)</code> which return proof that the <a href="#orgcfe82cd">Pad dataprop</a> relationship holds
+between the sorts of <code>pad</code> and <code>s</code> which in turn allows the solver to statically check
+that length of <code>s</code> includes the <code>cushion</code> described in the type signature.
+</p>
+
+<p>
+Another fun bit is the typechecker enforced <code>strnptr_free ...</code> calls. Filling
+a list with characters allocates space. When appending the list to <code>s</code> it
+needs to copy both to build a new string. This is where ATS' linear logic
+really shines; because they are copied the type system knows that they are
+still around in memory and complains if not freed.
+</p>
+
+<p>
+The nastiness is the lines starting with <code>$UN</code>. The ATS 0.3.8 standard
+library is missing the function to append two <code>strnptr</code>'s so I had to coerce
+it a <code>string</code>, the a garbage collected C string so I could use its append
+implementation which is essentially the same as <code>strnptr</code>'s. As I mentioned
+earlier this bug is now fixed.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8ee306f" class="outline-2">
+<h2 id="org8ee306f"><span class="section-number-2">7</span> Main</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Here we parse command line arguments and finally make an actual call to
+<code>left_pad</code>! The <code>main</code> function is interesting in that it highlights some
+weaknesses with ATS, it's ecosytem, but also shows one of its jewels, the
+embedded proof language and the intermixing of proofs with term-level code.
+</p>
+<div class="org-src-container">
+<pre class="src src-text">implement main0(argc, argv) =
+  let
+    val args = listize_argc_argv(argc,argv)
+    val _ =
+      if list_vt_length(args) = 3
+      then (
+        let
+          val c = '0'
+          val s = g1ofg0(args[1]) : [n:nat] string n
+          val pad = g1ofg0(g0string2int(args[2]))
+        in
+          if length(s) &gt; 0 &amp;&amp; pad &gt; 0
+          then (
+            let
+              prval _ = lemma_not_empty(s) where {
+                extern praxi
+                  lemma_not_empty{n:int}(x:string(n)):[n &gt; 0] void
+              }
+              prval _ = lemma_not_zero(pad) where {
+                extern praxi
+                  lemma_not_zero{n:int}(x:int(n)):[n &gt; 0] void
+              }
+              val (pf | res) = left_pad(i2ssz(pad),c, string1_copy(s))
+            in
+              begin
+                println! ("padding: ", res);
+                strnptr_free(res);
+              end
+           end
+          )
+          else
+            print "Usage: left-pad &lt;string-to-pad&gt; &lt;pad-length&gt;\n"
+        end
+      )
+      else print "Usage: left-pad &lt;string-to-pad&gt; &lt;pad-length&gt;\n"
+  in
+    list_vt_free(args)
+  end
+</pre>
+</div>
+<p>
+First the bad, the ATS standard library has almost no CLI support except
+<code>listize_argc_argv</code> which converts them into a list of strings.. Moreover
+there's a whole bunch of gross type level casting needed to coerce them to
+the needed type. That's what all the <code>g1of*</code> and <code>g0of*</code> functions do. This
+should all really be hidden away in a library.
+</p>
+
+<p>
+The good stuff is the lines starting with <code>prval</code> and <code>praxi</code>. ATS has a full
+type level language for writing proofs that looks quite a bit like the term
+language. They can be freely intermixed and proofs get erased away at runtime
+so there is no performance cost.
+</p>
+
+<p>
+Why do I need them? Because the <a href="#orgcfe82cd">type signature of left_pad</a> says that the pad
+length and string passed in have to be greater than 0. Since IO boundaries
+have no type information we have to somehow <i>tell</i> the typechecker that
+everything's a-ok with the string and pad. <code>prval</code> (proof value) brings a
+proof into scope and <code>praxi</code> (proof axiom) asserts whatever it wants. For
+example, to show that the string is not empty I wrote an axiom
+<code>lemma_not_empty</code> which takes a length indexed string and simply commands
+the typechecker that it is non null and and adds that to store of assumptions.
+And the same with the pad and <code>lemma_not_zero</code>. Of course, it's on me to make
+sure that those axioms are true with a runtime check, but that's a check I
+would have to write anyway so there's no unnecessary work being done.
+</p>
+
+<p>
+Other than that I just call <code>left_pad</code>, print the result, free it and that's
+pretty much it!
+</p>
+
+<p>
+If you'd like to start a discussion thread or comment please open an issue.
+</p>
+
+<p>
+Hope you enjoyed this!
+</p>
+</div>
+</div>
+
+<div id="outline-container-org73f0be0" class="outline-2">
+<h2 id="org73f0be0"><span class="section-number-2">8</span> References</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+If you'd like to know more:
+</p>
+<ul class="org-ul">
+<li>The most comprehensive reference is <a href="http://ats-lang.sourceforge.net/DOCUMENT/INT2PROGINATS/HTML/INT2PROGINATS-BOOK-onechunk.html">An Introduction To Programming In ATS</a>. It is difficult reading.</li>
+<li><a href="https://bluishcoder.co.nz/tags/ats/index.html">Chris Double's ATS posts</a> are wonderfully written and approachable. Some of the older articles are written in ATS1 and probably won't compile but still very worth reading.</li>
+<li>The <a href="https://groups.google.com/forum/#!forum/ats-lang-users">ATS Google Group</a> is really helpful and responsive. The author of ATS is very generous with his time.</li>
+<li>I <a href="https://www.youtube.com/watch?v=zt0OQb1DBko">talked about ATS</a> in September 2017. It's more of an intro/teaser than a tutorial.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Aditya Siram</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,293 @@
+#+TITLE: ATS Left Pad
+#+AUTHOR: Aditya Siram
+#+PROPERTY: header-args    :comments noweb
+#+OPTIONS: ^:nil ;; let an underscore be an underscore, disable sub-superscripting
+#+OPTIONS: timestamp:nil
+
+* Overview
+  The implementation of ~left-pad~ below is an exercise in wilfully
+  complicating a small problem to demonstrate some of the unique features of
+  the [[http://ats-lang.org][ATS programming language]] for verified systems programming including
+  refinement types, linear logic and embedded proofs.
+
+  ~left-pad~ is a small command-line program that takes a string and length and
+  fills out the string to that length with '0's. If the string is longer than the
+  given length it isn't changed. For example:
+  #+BEGIN_EXAMPLE
+  > ./left-pad xxx 5
+  padding: 00xxx
+  > ./left-pad xxx 2
+  padding: xxx
+  #+END_EXAMPLE
+
+  Since ATS is for systems programming and I have to show that ~left-pad~ is memory clean:
+  #+BEGIN_EXAMPLE
+  > valgrind ./left-pad xxxxx 20
+  ==19303== Memcheck, a memory error detector
+  ==19303== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+  ==19303== Using Valgrind-3.12.0.SVN and LibVEX; rerun with -h for copyright info
+  ==19303== Command: ./left-pad xxxxx 20
+  ==19303==
+  padding: 000000000000000xxxxx
+  ==19303==
+  ==19303== HEAP SUMMARY:
+  ==19303==     in use at exit: 0 bytes in 0 blocks
+  ==19303==   total heap usage: 22 allocs, 22 frees, 1,355 bytes allocated
+  ==19303==
+  ==19303== All heap blocks were freed -- no leaks are possible
+  ==19303==
+  ==19303== For counts of detected and suppressed errors, rerun with: -v
+  ==19303== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+  #+END_EXAMPLE
+
+  You might be shocked that ~left-pad~ is allocating a kilobyte of heap memory
+  for 20 characters. This is on purpose! The implementation below isn't about
+  conserving memory but making a mess and leaning on the type system to make me
+  clean it up.
+
+  Also my ~left-pad~ is totally not Unicode safe.
+
+* Installation
+  To install ATS this install script [[https://github.com/ats-lang/ats-lang.github.io/blob/master/SCRIPT/C9-ATS2-install.sh][provided on Github]]. Please inspect it first! To build ~left-pad~, clone this repo and do:
+  #+BEGIN_EXAMPLE
+  > make
+  #+END_EXAMPLE
+
+* Imports
+  #+BEGIN_SRC text :tangle left-pad.dats
+#include "share/atspre_staload.hats"
+staload UN = "prelude/SATS/unsafe.sats"
+  #+END_SRC
+  Most ATS programs start with the ~#include~ line, it imports a number of useful
+  modules from the ATS prelude.
+
+  The second import is a module needed for unsafe coercions. They circumvent the
+  type system and are needed in this case due to a bug ATS version 0.3.8. It has
+  since been [[https://github.com/githwxi/ATS-Postiats/commit/015b41486ba0ad681cc2590c53e9a9ad2f2dc26e][fixed]] but a new version has not been released as of this writing.
+
+* The Type Of Left Pad
+  The essence of left pad can captured pretty comfortably into the ATS type system:
+  #+NAME: PAD prop
+  #+BEGIN_SRC text :tangle left-pad.dats
+dataprop PAD(int,int,int) =
+  | {p,l:nat} Yep(p,l,p-l)
+  | {p,l:nat} Nope(p,l,0)
+
+extern fun left_pad
+  {p,l:nat | p>0 && l>0}
+  (
+    pad: ssize_t p,
+    c: charNZ,
+    s: strnptr l
+  ): [cushion:nat] (PAD(p,l,cushion) | strnptr (cushion+l))
+  #+END_SRC
+  The first block represents a relationship between /sorts/ of types. A sort in
+  ATS is a type which indexes another type constraining it in some way. A
+  ~dataprop~ encodes a relationship between sorts, in this case, deciding whether
+  or not to pad the string at the sort level. This is confusing and I will return
+  to this ~dataprop~ a couple of paragraphs down.
+
+  The second block is the type signature of ~left_pad~. In most programming languages
+  function signatures have arguments and their types, in ATS we have to deal with
+  sorts, refinements and proofs as well. I think ATS signatures are easiest to understand
+  when each level is considered individually.
+
+  At the value level it takes:
+  - ~pad~, the amount to which to pad the string,
+  - ~c~, the pad character
+  - ~s~, the string itself.
+
+  At the type level we have:
+  - ~pad~, a ~ssize_t~ which is just like C's ~size_t~ but signed
+  - ~c~, a C char
+  - ~s~, a pointer to a null terminated C string.
+
+  At the level of sorts and refinements:
+  - ~pad~ is indexed by ~p~ which is constrained (in the line starting with
+    ~{p,l:nat ... }~) to be a natural number greater than 0. Practically this
+    means that in order to call ~left_pad~
+    the type checker has to be satisfied that ~pad~ is 1 or more.
+  - with ~c~ it isn't apparent but ~charNZ~ which comes from the prelude is a C char refined so it cannot be null.
+  - ~s~ is a C string guaranteed to be non-empty because it is length indexed with
+    ~l~ refined a natural number that has to be non-zero.
+
+  The return type following the ~:~ on the last line has 2 parts: the string
+  being returned to the right of the ~|~, and to the left a /proof/ that the
+  sorts introduced ~p~ and ~l~ and a new sort ~cushion~ are related to each
+  other in one of the ways ~Yep~ or ~Nope~ described by the ~dataprop~ ~PAD~. In
+  case of ~Yep~ relates ~p~ and ~l~ to the ~cushion~ as ~p-l~. Otherwise ~Nope~
+  relates them to to 0. Practically ~cushion~ is a sort level natural number
+  attesting that the string gets padded by the difference of ~pad~ and the
+  length of ~s~ or that ~s~ is untouched.
+
+* Generating The Pad
+** Type
+   The pad itself uses ~fill_list~ to build a linked list of the same character.
+   #+BEGIN_SRC text :tangle left-pad.dats
+extern fun {t:t@ype} fill_list
+  {n:nat}
+  (
+    size:ssize_t n,
+    c: t
+  ): list_vt(t,n)
+   #+END_SRC
+   ~fill_list~ is a function that creates a list of some generic type,
+   ~{t:t@ype}~ by taking a ~size~ modified by a sort ~n~ which tracks the
+   number of items to be filled, and the element ~c~ that will get replicated
+   ~size~ times. It returns a ~list_vt~, a list /viewtype/, meaning it can only
+    be used once, filled with ~t~'s and also length indexed by ~n~. This statically
+    guarantees that the return list will have ~size~ elements.
+
+** Implementation
+   A recursive inner function ~loop~ is used to build up the list. Recursion is
+   very encouraged, safe, efficient and well integrated into ATS. The ~.<i>.~ is a
+   termination metric, a sort that must be shown to be decreasing on every
+   recursive call which guarantees that recursion will terminate. If ~pred size~
+   was not there in the recursive call the loop would not typecheck.
+   #+BEGIN_SRC text :tangle left-pad.dats
+implement {t}fill_list{n}(size,c) =
+  let
+    fun loop
+      {i:nat | i <= n}
+      .<i>.
+      (
+        size : ssize_t i,
+        c: t,
+        res: list_vt(t, n-i)
+      ): list_vt(t,n) =
+      if (size = i2ssz(0))
+      then res
+      else loop(pred size, c, list_vt_cons(c,res))
+  in
+    loop(size,c,list_vt_nil())
+  end
+   #+END_SRC
+
+* The Implementation Of Left Pad
+  The code for ~left_pad~ itself is mostly what you might expect but with a couple of points
+  of interest and a bit of nastiness.
+   #+BEGIN_SRC text :tangle left-pad.dats
+implement left_pad{p,l}(pad,c,s) =
+  let
+    val size = strnptr_length(s)
+  in
+    if (pad > size)
+    then
+      let
+        val padding = pad-size
+        val char_list = fill_list(padding,c)
+        val pad_string = string_make_list_vt(char_list)
+        val res = string1_append(
+                    $UN.strnptr2string(pad_string),
+                    $UN.strnptr2string(s)
+                  )
+      in
+        begin
+          strnptr_free(pad_string);
+          strnptr_free(s);
+          (Yep{p,l} | res)
+        end
+      end
+    else
+      (Nope{p,l} | s)
+  end
+#+END_SRC
+
+   One interesting bit are the lines starting with ~(Yep{p,l} | ...)~ and
+   ~(Nope{p,l} | ...)~ which return proof that the [[PAD prop][Pad dataprop]] relationship holds
+   between the sorts of ~pad~ and ~s~ which in turn allows the solver to statically check
+   that length of ~s~ includes the ~cushion~ described in the type signature.
+
+   Another fun bit is the typechecker enforced ~strnptr_free ...~ calls. Filling
+   a list with characters allocates space. When appending the list to ~s~ it
+   needs to copy both to build a new string. This is where ATS' linear logic
+   really shines; because they are copied the type system knows that they are
+   still around in memory and complains if not freed.
+
+   The nastiness is the lines starting with ~$UN~. The ATS 0.3.8 standard
+   library is missing the function to append two ~strnptr~'s so I had to coerce
+   it a ~string~, the a garbage collected C string so I could use its append
+   implementation which is essentially the same as ~strnptr~'s. As I mentioned
+   earlier this bug is now fixed.
+
+* Main
+  Here we parse command line arguments and finally make an actual call to
+  ~left_pad~! The ~main~ function is interesting in that it highlights some
+  weaknesses with ATS, it's ecosytem, but also shows one of its jewels, the
+  embedded proof language and the intermixing of proofs with term-level code.
+#+BEGIN_SRC text :tangle left-pad.dats
+implement main0(argc, argv) =
+  let
+    val args = listize_argc_argv(argc,argv)
+    val _ =
+      if list_vt_length(args) = 3
+      then (
+        let
+          val c = '0'
+          val s = g1ofg0(args[1]) : [n:nat] string n
+          val pad = g1ofg0(g0string2int(args[2]))
+        in
+          if length(s) > 0 && pad > 0
+          then (
+            let
+              prval _ = lemma_not_empty(s) where {
+                extern praxi
+                  lemma_not_empty{n:int}(x:string(n)):[n > 0] void
+              }
+              prval _ = lemma_not_zero(pad) where {
+                extern praxi
+                  lemma_not_zero{n:int}(x:int(n)):[n > 0] void
+              }
+              val (pf | res) = left_pad(i2ssz(pad),c, string1_copy(s))
+            in
+              begin
+                println! ("padding: ", res);
+                strnptr_free(res);
+              end
+           end
+          )
+          else
+            print "Usage: left-pad <string-to-pad> <pad-length>\n"
+        end
+      )
+      else print "Usage: left-pad <string-to-pad> <pad-length>\n"
+  in
+    list_vt_free(args)
+  end
+   #+END_SRC
+   First the bad, the ATS standard library has almost no CLI support except
+   ~listize_argc_argv~ which converts them into a list of strings.. Moreover
+   there's a whole bunch of gross type level casting needed to coerce them to
+   the needed type. That's what all the ~g1of*~ and ~g0of*~ functions do. This
+   should all really be hidden away in a library.
+
+   The good stuff is the lines starting with ~prval~ and ~praxi~. ATS has a full
+   type level language for writing proofs that looks quite a bit like the term
+   language. They can be freely intermixed and proofs get erased away at runtime
+   so there is no performance cost.
+
+   Why do I need them? Because the [[PAD prop][type signature of left_pad]] says that the pad
+   length and string passed in have to be greater than 0. Since IO boundaries
+   have no type information we have to somehow /tell/ the typechecker that
+   everything's a-ok with the string and pad. ~prval~ (proof value) brings a
+   proof into scope and ~praxi~ (proof axiom) asserts whatever it wants. For
+   example, to show that the string is not empty I wrote an axiom
+   ~lemma_not_empty~ which takes a length indexed string and simply commands
+   the typechecker that it is non null and and adds that to store of assumptions.
+   And the same with the pad and ~lemma_not_zero~. Of course, it's on me to make
+   sure that those axioms are true with a runtime check, but that's a check I
+   would have to write anyway so there's no unnecessary work being done.
+
+   Other than that I just call ~left_pad~, print the result, free it and that's
+   pretty much it!
+
+   If you'd like to start a discussion thread or comment please open an issue.
+
+   Hope you enjoyed this!
+
+* References
+If you'd like to know more:
+- The most comprehensive reference is [[http://ats-lang.sourceforge.net/DOCUMENT/INT2PROGINATS/HTML/INT2PROGINATS-BOOK-onechunk.html][An Introduction To Programming In ATS]]. It is difficult reading.
+- [[https://bluishcoder.co.nz/tags/ats/index.html][Chris Double's ATS posts]] are wonderfully written and approachable. Some of the older articles are written in ATS1 and probably won't compile but still very worth reading.
+- The [[https://groups.google.com/forum/#!forum/ats-lang-users][ATS Google Group]] is really helpful and responsive. The author of ATS is very generous with his time.
+- I [[https://www.youtube.com/watch?v=zt0OQb1DBko][talked about ATS]] in September 2017. It's more of an intro/teaser than a tutorial.
