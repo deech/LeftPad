@@ -1,5 +1,4 @@
 #include "share/atspre_staload.hats"
-staload UN = "prelude/SATS/unsafe.sats"
 
 dataprop PAD(int,int,int) =
   | {p,l:nat} Yep(p,l,p-l)
@@ -47,10 +46,7 @@ implement left_pad{p,l}(pad,c,s) =
         val padding = pad-size
         val char_list = fill_list(padding,c)
         val pad_string = string_make_list_vt(char_list)
-        val res = string1_append(
-                    $UN.strnptr2string(pad_string),
-                    $UN.strnptr2string(s)
-                  )
+        val res = strnptr_append(pad_string, s)
       in
         begin
           strnptr_free(pad_string);

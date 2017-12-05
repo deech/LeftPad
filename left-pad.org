@@ -1,6 +1,6 @@
 #+TITLE: ATS Left Pad
 #+AUTHOR: Aditya Siram
-#+PROPERTY: header-args    :comments noweb
+#+PROPERTY: header-args    :comments no
 #+OPTIONS: ^:nil ;; let an underscore be an underscore, disable sub-superscripting
 #+OPTIONS: timestamp:nil
 
@@ -48,7 +48,7 @@
   Also my ~left-pad~ is totally not Unicode safe.
 
 * Installation
-  To install ATS this install script [[https://github.com/ats-lang/ats-lang.github.io/blob/master/SCRIPT/C9-ATS2-install.sh][provided on Github]]. Please inspect it first! To build ~left-pad~, clone this repo and do:
+  To install ATS run this script [[https://github.com/ats-lang/ats-lang.github.io/blob/master/SCRIPT/C9-ATS2-install-latest.sh][provided on Github]]. Please inspect it first! To build ~left-pad~, clone this repo and:
   #+BEGIN_EXAMPLE
   > make
   #+END_EXAMPLE
@@ -56,17 +56,12 @@
 * Imports
   #+BEGIN_SRC text :tangle left-pad.dats
 #include "share/atspre_staload.hats"
-staload UN = "prelude/SATS/unsafe.sats"
   #+END_SRC
   Most ATS programs start with the ~#include~ line, it imports a number of useful
   modules from the ATS prelude.
 
-  The second import is a module needed for unsafe coercions. They circumvent the
-  type system and are needed in this case due to a bug ATS version 0.3.8. It has
-  since been [[https://github.com/githwxi/ATS-Postiats/commit/015b41486ba0ad681cc2590c53e9a9ad2f2dc26e][fixed]] but a new version has not been released as of this writing.
-
 * The Type Of Left Pad
-  The essence of left pad can captured pretty comfortably into the ATS type system:
+  The essence of left pad can captured pretty comfortably in the ATS type system:
   #+NAME: PAD prop
   #+BEGIN_SRC text :tangle left-pad.dats
 dataprop PAD(int,int,int) =
@@ -87,7 +82,7 @@ extern fun left_pad
   or not to pad the string at the sort level. This is confusing and I will return
   to this ~dataprop~ a couple of paragraphs down.
 
-  The second block is the type signature of ~left_pad~. In most programming languages
+  The second block is the type signature of ~left_pad~. In most typed programming languages
   function signatures have arguments and their types, in ATS we have to deal with
   sorts, refinements and proofs as well. I think ATS signatures are easiest to understand
   when each level is considered individually.
@@ -111,14 +106,15 @@ extern fun left_pad
   - ~s~ is a C string guaranteed to be non-empty because it is length indexed with
     ~l~ refined a natural number that has to be non-zero.
 
-  The return type following the ~:~ on the last line has 2 parts: the string
-  being returned to the right of the ~|~, and to the left a /proof/ that the
-  sorts introduced ~p~ and ~l~ and a new sort ~cushion~ are related to each
-  other in one of the ways ~Yep~ or ~Nope~ described by the ~dataprop~ ~PAD~. In
-  case of ~Yep~ relates ~p~ and ~l~ to the ~cushion~ as ~p-l~. Otherwise ~Nope~
-  relates them to to 0. Practically ~cushion~ is a sort level natural number
-  attesting that the string gets padded by the difference of ~pad~ and the
-  length of ~s~ or that ~s~ is untouched.
+  The return type following the ~:~ on the last line has 2 parts: the padded
+  string returned to the right of the ~|~, and to the left a /proof/ that the
+  sorts passed in via ~pad~ and ~s~, ~p~ and ~l~ and a new sort ~cushion~ are
+  related to each other in one of the ways enumerated by the ~dataprop~ ~PAD~,
+  ~Yep~ or ~Nope~ . In case of ~Yep~, ~p~ and ~l~ to the ~cushion~ as ~p-l~.
+  Otherwise ~Nope~ ~p~ and ~l~ are ignored and ~cushion~ is 0. Practically
+  ~cushion~ is a sort level natural number attesting that (1) the string gets
+  padded by the difference of ~pad~ and the length of ~s~ or (2) ~s~ is
+  untouched.
 
 * Generating The Pad
 ** Type
@@ -165,32 +161,29 @@ implement {t}fill_list{n}(size,c) =
 
 * The Implementation Of Left Pad
   The code for ~left_pad~ itself is mostly what you might expect but with a couple of points
-  of interest and a bit of nastiness.
+  of interest.
    #+BEGIN_SRC text :tangle left-pad.dats
-implement left_pad{p,l}(pad,c,s) =
-  let
-    val size = strnptr_length(s)
-  in
-    if (pad > size)
-    then
-      let
-        val padding = pad-size
-        val char_list = fill_list(padding,c)
-        val pad_string = string_make_list_vt(char_list)
-        val res = string1_append(
-                    $UN.strnptr2string(pad_string),
-                    $UN.strnptr2string(s)
-                  )
-      in
-        begin
-          strnptr_free(pad_string);
-          strnptr_free(s);
-          (Yep{p,l} | res)
-        end
-      end
-    else
-      (Nope{p,l} | s)
-  end
+     implement left_pad{p,l}(pad,c,s) =
+       let
+         val size = strnptr_length(s)
+       in
+         if (pad > size)
+         then
+           let
+             val padding = pad-size
+             val char_list = fill_list(padding,c)
+             val pad_string = string_make_list_vt(char_list)
+             val res = strnptr_append(pad_string, s)
+           in
+             begin
+               strnptr_free(pad_string);
+               strnptr_free(s);
+               (Yep{p,l} | res)
+             end
+           end
+         else
+           (Nope{p,l} | s)
+       end
 #+END_SRC
 
    One interesting bit are the lines starting with ~(Yep{p,l} | ...)~ and
@@ -203,12 +196,6 @@ implement left_pad{p,l}(pad,c,s) =
    needs to copy both to build a new string. This is where ATS' linear logic
    really shines; because they are copied the type system knows that they are
    still around in memory and complains if not freed.
-
-   The nastiness is the lines starting with ~$UN~. The ATS 0.3.8 standard
-   library is missing the function to append two ~strnptr~'s so I had to coerce
-   it a ~string~, the a garbage collected C string so I could use its append
-   implementation which is essentially the same as ~strnptr~'s. As I mentioned
-   earlier this bug is now fixed.
 
 * Main
   Here we parse command line arguments and finally make an actual call to
