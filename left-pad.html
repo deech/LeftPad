@@ -233,25 +233,25 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org5859939">1. Overview</a></li>
-<li><a href="#org6bd07ff">2. Installation</a></li>
-<li><a href="#orga05015b">3. Imports</a></li>
-<li><a href="#orgbc0fd00">4. The Type Of Left Pad</a></li>
-<li><a href="#org24f228a">5. Generating The Pad</a>
+<li><a href="#org066c1aa">1. Overview</a></li>
+<li><a href="#org12e1288">2. Installation</a></li>
+<li><a href="#orga784bb4">3. Imports</a></li>
+<li><a href="#org03803cc">4. The Type Of Left Pad</a></li>
+<li><a href="#orgcdb80fe">5. Generating The Pad</a>
 <ul>
-<li><a href="#orge1b4610">5.1. Type</a></li>
-<li><a href="#org00b4ceb">5.2. Implementation</a></li>
+<li><a href="#orgf9d87b2">5.1. Type</a></li>
+<li><a href="#orgcd3b592">5.2. Implementation</a></li>
 </ul>
 </li>
-<li><a href="#orgddf8f97">6. The Implementation Of Left Pad</a></li>
-<li><a href="#org5c8cd79">7. Main</a></li>
-<li><a href="#org835de8d">8. References</a></li>
+<li><a href="#orgf3b5071">6. The Implementation Of Left Pad</a></li>
+<li><a href="#orgfee6803">7. Main</a></li>
+<li><a href="#org8ed6e07">8. References</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org5859939" class="outline-2">
-<h2 id="org5859939"><span class="section-number-2">1</span> Overview</h2>
+<div id="outline-container-org066c1aa" class="outline-2">
+<h2 id="org066c1aa"><span class="section-number-2">1</span> Overview</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The implementation of <code>left-pad</code> below is an exercise in wilfully
@@ -307,11 +307,11 @@ Also my <code>left-pad</code> is totally not Unicode safe.
 </div>
 </div>
 
-<div id="outline-container-org6bd07ff" class="outline-2">
-<h2 id="org6bd07ff"><span class="section-number-2">2</span> Installation</h2>
+<div id="outline-container-org12e1288" class="outline-2">
+<h2 id="org12e1288"><span class="section-number-2">2</span> Installation</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-To install ATS this install script <a href="https://github.com/ats-lang/ats-lang.github.io/blob/master/SCRIPT/C9-ATS2-install.sh">provided on Github</a>. Please inspect it first! To build <code>left-pad</code>, clone this repo and do:
+To install ATS run this script <a href="https://github.com/ats-lang/ats-lang.github.io/blob/master/SCRIPT/C9-ATS2-install-latest.sh">provided on Github</a>. Please inspect it first! To build <code>left-pad</code>, clone this repo and:
 </p>
 <pre class="example">
 &gt; make
@@ -319,35 +319,28 @@ To install ATS this install script <a href="https://github.com/ats-lang/ats-lang
 </div>
 </div>
 
-<div id="outline-container-orga05015b" class="outline-2">
-<h2 id="orga05015b"><span class="section-number-2">3</span> Imports</h2>
+<div id="outline-container-orga784bb4" class="outline-2">
+<h2 id="orga784bb4"><span class="section-number-2">3</span> Imports</h2>
 <div class="outline-text-2" id="text-3">
 <div class="org-src-container">
 <pre class="src src-text">#include "share/atspre_staload.hats"
-staload UN = "prelude/SATS/unsafe.sats"
 </pre>
 </div>
 <p>
 Most ATS programs start with the <code>#include</code> line, it imports a number of useful
 modules from the ATS prelude.
 </p>
-
-<p>
-The second import is a module needed for unsafe coercions. They circumvent the
-type system and are needed in this case due to a bug ATS version 0.3.8. It has
-since been <a href="https://github.com/githwxi/ATS-Postiats/commit/015b41486ba0ad681cc2590c53e9a9ad2f2dc26e">fixed</a> but a new version has not been released as of this writing.
-</p>
 </div>
 </div>
 
-<div id="outline-container-orgbc0fd00" class="outline-2">
-<h2 id="orgbc0fd00"><span class="section-number-2">4</span> The Type Of Left Pad</h2>
+<div id="outline-container-org03803cc" class="outline-2">
+<h2 id="org03803cc"><span class="section-number-2">4</span> The Type Of Left Pad</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-The essence of left pad can captured pretty comfortably into the ATS type system:
+The essence of left pad can captured pretty comfortably in the ATS type system:
 </p>
 <div class="org-src-container">
-<pre class="src src-text" id="orgdc6edac">dataprop PAD(int,int,int) =
+<pre class="src src-text" id="org6484d71">dataprop PAD(int,int,int) =
   | {p,l:nat} Yep(p,l,p-l)
   | {p,l:nat} Nope(p,l,0)
 
@@ -369,7 +362,7 @@ to this <code>dataprop</code> a couple of paragraphs down.
 </p>
 
 <p>
-The second block is the type signature of <code>left_pad</code>. In most programming languages
+The second block is the type signature of <code>left_pad</code>. In most typed programming languages
 function signatures have arguments and their types, in ATS we have to deal with
 sorts, refinements and proofs as well. I think ATS signatures are easiest to understand
 when each level is considered individually.
@@ -407,24 +400,25 @@ the type checker has to be satisfied that <code>pad</code> is 1 or more.</li>
 </ul>
 
 <p>
-The return type following the <code>:</code> on the last line has 2 parts: the string
-being returned to the right of the <code>|</code>, and to the left a <i>proof</i> that the
-sorts introduced <code>p</code> and <code>l</code> and a new sort <code>cushion</code> are related to each
-other in one of the ways <code>Yep</code> or <code>Nope</code> described by the <code>dataprop</code> <code>PAD</code>. In
-case of <code>Yep</code> relates <code>p</code> and <code>l</code> to the <code>cushion</code> as <code>p-l</code>. Otherwise <code>Nope</code>
-relates them to to 0. Practically <code>cushion</code> is a sort level natural number
-attesting that the string gets padded by the difference of <code>pad</code> and the
-length of <code>s</code> or that <code>s</code> is untouched.
+The return type following the <code>:</code> on the last line has 2 parts: the padded
+string returned to the right of the <code>|</code>, and to the left a <i>proof</i> that the
+sorts passed in via <code>pad</code> and <code>s</code>, <code>p</code> and <code>l</code> and a new sort <code>cushion</code> are
+related to each other in one of the ways enumerated by the <code>dataprop</code> <code>PAD</code>,
+<code>Yep</code> or <code>Nope</code> . In case of <code>Yep</code>, <code>p</code> and <code>l</code> to the <code>cushion</code> as <code>p-l</code>.
+Otherwise <code>Nope</code> <code>p</code> and <code>l</code> are ignored and <code>cushion</code> is 0. Practically
+<code>cushion</code> is a sort level natural number attesting that (1) the string gets
+padded by the difference of <code>pad</code> and the length of <code>s</code> or (2) <code>s</code> is
+untouched.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org24f228a" class="outline-2">
-<h2 id="org24f228a"><span class="section-number-2">5</span> Generating The Pad</h2>
+<div id="outline-container-orgcdb80fe" class="outline-2">
+<h2 id="orgcdb80fe"><span class="section-number-2">5</span> Generating The Pad</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-orge1b4610" class="outline-3">
-<h3 id="orge1b4610"><span class="section-number-3">5.1</span> Type</h3>
+<div id="outline-container-orgf9d87b2" class="outline-3">
+<h3 id="orgf9d87b2"><span class="section-number-3">5.1</span> Type</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 The pad itself uses <code>fill_list</code> to build a linked list of the same character.
@@ -449,8 +443,8 @@ number of items to be filled, and the element <code>c</code> that will get repli
 </div>
 </div>
 
-<div id="outline-container-org00b4ceb" class="outline-3">
-<h3 id="org00b4ceb"><span class="section-number-3">5.2</span> Implementation</h3>
+<div id="outline-container-orgcd3b592" class="outline-3">
+<h3 id="orgcd3b592"><span class="section-number-3">5.2</span> Implementation</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 A recursive inner function <code>loop</code> is used to build up the list. Recursion is
@@ -482,12 +476,12 @@ was not there in the recursive call the loop would not typecheck.
 </div>
 </div>
 
-<div id="outline-container-orgddf8f97" class="outline-2">
-<h2 id="orgddf8f97"><span class="section-number-2">6</span> The Implementation Of Left Pad</h2>
+<div id="outline-container-orgf3b5071" class="outline-2">
+<h2 id="orgf3b5071"><span class="section-number-2">6</span> The Implementation Of Left Pad</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 The code for <code>left_pad</code> itself is mostly what you might expect but with a couple of points
-of interest and a bit of nastiness.
+of interest.
 </p>
 <div class="org-src-container">
 <pre class="src src-text">implement left_pad{p,l}(pad,c,s) =
@@ -500,10 +494,7 @@ of interest and a bit of nastiness.
         val padding = pad-size
         val char_list = fill_list(padding,c)
         val pad_string = string_make_list_vt(char_list)
-        val res = string1_append(
-                    $UN.strnptr2string(pad_string),
-                    $UN.strnptr2string(s)
-                  )
+        val res = strnptr_append(pad_string, s)
       in
         begin
           strnptr_free(pad_string);
@@ -519,7 +510,7 @@ of interest and a bit of nastiness.
 
 <p>
 One interesting bit are the lines starting with <code>(Yep{p,l} | ...)</code> and
-<code>(Nope{p,l} | ...)</code> which return proof that the <a href="#orgdc6edac">Pad dataprop</a> relationship holds
+<code>(Nope{p,l} | ...)</code> which return proof that the <a href="#org6484d71">Pad dataprop</a> relationship holds
 between the sorts of <code>pad</code> and <code>s</code> which in turn allows the solver to statically check
 that length of <code>s</code> includes the <code>cushion</code> described in the type signature.
 </p>
@@ -531,19 +522,11 @@ needs to copy both to build a new string. This is where ATS' linear logic
 really shines; because they are copied the type system knows that they are
 still around in memory and complains if not freed.
 </p>
-
-<p>
-The nastiness is the lines starting with <code>$UN</code>. The ATS 0.3.8 standard
-library is missing the function to append two <code>strnptr</code>'s so I had to coerce
-it a <code>string</code>, the a garbage collected C string so I could use its append
-implementation which is essentially the same as <code>strnptr</code>'s. As I mentioned
-earlier this bug is now fixed.
-</p>
 </div>
 </div>
 
-<div id="outline-container-org5c8cd79" class="outline-2">
-<h2 id="org5c8cd79"><span class="section-number-2">7</span> Main</h2>
+<div id="outline-container-orgfee6803" class="outline-2">
+<h2 id="orgfee6803"><span class="section-number-2">7</span> Main</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 Here we parse command line arguments and finally make an actual call to
@@ -608,7 +591,7 @@ so there is no performance cost.
 </p>
 
 <p>
-Why do I need them? Because the <a href="#orgdc6edac">type signature of left_pad</a> says that the pad
+Why do I need them? Because the <a href="#org6484d71">type signature of left_pad</a> says that the pad
 length and string passed in have to be greater than 0. Since IO boundaries
 have no type information we have to somehow <i>tell</i> the typechecker that
 everything's a-ok with the string and pad. <code>prval</code> (proof value) brings a
@@ -641,8 +624,8 @@ Hope you enjoyed this!
 </div>
 </div>
 
-<div id="outline-container-org835de8d" class="outline-2">
-<h2 id="org835de8d"><span class="section-number-2">8</span> References</h2>
+<div id="outline-container-org8ed6e07" class="outline-2">
+<h2 id="org8ed6e07"><span class="section-number-2">8</span> References</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 If you'd like to know more:
