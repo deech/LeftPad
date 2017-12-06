@@ -1,6 +1,6 @@
 #+TITLE: ATS Left Pad
 #+AUTHOR: Aditya Siram
-#+PROPERTY: header-args    :comments noweb
+#+PROPERTY: header-args    :comments no
 #+OPTIONS: ^:nil ;; let an underscore be an underscore, disable sub-superscripting
 #+OPTIONS: timestamp:nil
 
@@ -212,9 +212,9 @@ implement left_pad{p,l}(pad,c,s) =
 
 * Main
   Here we parse command line arguments and finally make an actual call to
-  ~left_pad~! The ~main~ function is interesting in that it highlights some
-  weaknesses with ATS, it's ecosytem, but also shows one of its jewels, the
-  embedded proof language and the intermixing of proofs with term-level code.
+  ~left_pad~! The ~main~ function is interesting in that it highlights both a
+  weakness of ATS, its ecosystem, and one of its jewels, the embedded proof
+  language and the intermixing of proofs with term-level code.
 #+BEGIN_SRC text :tangle left-pad.dats
 implement main0(argc, argv) =
   let
@@ -277,6 +277,9 @@ implement main0(argc, argv) =
    And the same with the pad and ~lemma_not_zero~. Of course, it's on me to make
    sure that those axioms are true with a runtime check, but that's a check I
    would have to write anyway so there's no unnecessary work being done.
+
+   *Update*: Turns out I [[https://github.com/deech/LeftPad/issues/2][didn't need]] the ~prval~ and ~praxi~ but I left them
+   in because they're cool.
 
    Other than that I just call ~left_pad~, print the result, free it and that's
    pretty much it!
